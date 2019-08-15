@@ -1,0 +1,106 @@
+#%RAML 1.0
+title: Weather REST Services API using Data Types
+version: v1
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/cf99f9fe-dc6c-4748-a4f5-1809aee3a158/api/{version}
+mediaType: application/json
+
+securitySchemes:
+  basicAuth:
+    description: Each request must contain the headers necessary for
+                 basic authentication
+    type: Basic Authentication
+    describedBy:
+      headers:
+        Authorization:
+          description: Used to send the Base64-encoded "username:password"
+                       credentials
+          type: string
+      responses:
+        401:
+          description: |
+            Unauthorized. Either the provided username and password
+            combination is invalid, or the user is not allowed to access
+            the content provided by the requested URL.
+            
+            
+/global-weather:     
+  /cities-by-country:
+    get:
+      description: Get All cities By Country
+      queryParameters:
+        countryName:
+          description: "name of the country"
+          required: true
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                [
+                   {"country":"Australia", 
+                     "city":"sydney" 
+                   },
+                    {"country":"Australia", 
+                       "city":"rosehill" 
+                     }
+                ]
+        404:
+          body:
+            application/json:
+             example: { "message" : "Not found"}      
+        400 :
+          body:
+            application/json:
+             example: { "message" : "Bad Request"}   
+        500 :
+          body:
+            application/json:
+             example: { "message" : "Internal Server Error"}      
+       
+    
+  /weather:
+    get:
+      description: Get All cities By Country
+      queryParameters:
+        countryName:
+          description: "name of the country"
+          required: true
+        cityName:
+          description: "name of the city"
+          required: true
+    
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                [
+                   {"location":"Melbourne", 
+                     "time":"11.00 AM" ,
+                     "wind" : "15 kmph",
+                 "visibility" : "10km",
+                 "sky condition" : "sunny",
+                 "temprature" : "18 C",
+                 "dewpoint" : "2 C",
+                 "relativehumidity" : "35",
+                 "status" : "normal" 
+                   }
+                ]
+        404:
+          body:
+            application/json:
+             example: { "message" : "Not found"}      
+        400 :
+          body:
+            application/json:
+             example: { "message" : "Bad Request"}   
+        403 :
+          body:
+            application/json:
+             example: { "message" : "Forbidden"}   
+        
+        500 :
+          body:
+            application/json:
+             example: { "message" : "Internal Server Error"}      
+       
