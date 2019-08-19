@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:xml-module="http://www.mulesoft.org/schema/mule/xml-module" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:xml-module="http://www.mulesoft.org/schema/mule/xml-module" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/xml-module http://www.mulesoft.org/schema/mule/xml-module/current/mule-xml-module.xsd">
+http://www.mulesoft.org/schema/mule/xml-module http://www.mulesoft.org/schema/mule/xml-module/current/mule-xml-module.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
     
     
     <http:listener-config name="GlobalWeather-httpListenerConfig">
@@ -149,7 +150,7 @@ ns ns0 http://www.webserviceX.NET
 		<ee:transform doc:name="Transform Message" doc:id="5b309f81-0dcb-430e-8f78-b32cec350cc3" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
+output application/java
 ns ns0 http://www.webserviceX.NET
 ---
 
@@ -157,6 +158,28 @@ payload.body.ns0#GetCitiesByCountryResponse
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="2bd99048-6eb6-4779-8a7f-a20156b0e620" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload[0] as String
+replace /&lt;/ with '<' replace /&gt;/ with '>' replace /&quot;/ with '"' replace /&apos;/ with "'" replace /&amp;/ with '&' replace "\n" with '']]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload as String]" doc:name="Webservice Response" doc:id="4afd2533-075a-4e5f-a716-3c478dd2c0b6" variableName="payloadResponse"/>
+		<scripting:execute engine="groovy" doc:name="Xml to Json" doc:id="32cdbd3f-8166-425a-8026-f08dceb6916d" >
+			<scripting:code >def parsed = new XmlSlurper().parseText(vars.payloadResponse);
+def map = [(parsed[0].name): parsed.'**'.
+   findAll{it.name() == 'Table'}.
+   collect{ row -&gt;
+       row.collectEntries{[Country: row.Country.text(), City:row.City.text()]}
+   }]
+   
+   payload = new groovy.json.JsonBuilder(map).toPrettyString()
+
+return payload;</scripting:code>
+		</scripting:execute>
 		<logger level="INFO" doc:name="Logger" doc:id="2a99ddbb-29c5-474e-94dc-8af665c4c47b" message="#[payload]"/>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="61c52ccb-659f-4dd4-a5c5-95fe2ed14cde" type="ANY">
@@ -189,6 +212,38 @@ ns ns0 http://www.webserviceX.NET
 payload.body.ns0#GetWeatherResponse]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="6e77261e-2453-4182-b570-b96614760644" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+payload[0] as String
+replace /&lt;/ with '<' replace /&gt;/ with '>' replace /&quot;/ with '"' replace /&apos;/ with "'" replace /&amp;/ with '&' replace "\n" with '']]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload as String]" doc:name="weather" doc:id="1a6a58ad-f2b1-4673-a5d8-ff374b840af2" variableName="weatherResponse"/>
+		<scripting:execute doc:name="Groovy xml to Json" doc:id="95099fee-49a2-4dd0-9f89-ac9b52712fe8" engine="groovy">
+			<scripting:code >import java.util.regex.* 
+
+
+def resultString = &quot;&quot;;     
+Pattern regex = Pattern.compile(&quot;(?&lt;!(&lt;!\\[CDATA\\[))|((.*)\\w+\\W)&quot;);    
+Matcher regexMatcher = regex.matcher(vars.weatherResponse.toString().replaceAll(&quot;\\s&quot;,&quot;&quot;));     
+while (regexMatcher.find()) {         resultString += regexMatcher.group();     }
+
+def parsed = new XmlParser().parseText(resultString.toString());
+def map = new TreeMap()
+parsed.each {
+ map.put(it.name(), it.text())
+}
+
+
+payload =  new groovy.json.JsonBuilder(map).toPrettyString();
+
+return payload;
+</scripting:code>
+		</scripting:execute>
 		<logger level="INFO" doc:name="Logger" doc:id="7576387f-2a01-44f6-b882-907c03ac71cf" message="#[payload]"/>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7ce1adff-4718-42e6-a5ec-d15274a519e9" type="ANY">
