@@ -36,14 +36,14 @@ securitySchemes:
           body:
             application/json:
               example: |
-                [
+               { "NewDataSet" : [
                    {"country":"Australia", 
                      "city":"sydney" 
                    },
                     {"country":"Australia", 
                        "city":"rosehill" 
                      }
-                ]
+                ] }
         404:
           body:
             application/json:
@@ -75,7 +75,8 @@ securitySchemes:
             application/json:
               example: |
                 [
-                   {"location":"Melbourne", 
+                   {
+                   "location":"Melbourne", 
                      "time":"11.00 AM" ,
                      "wind" : "15 kmph",
                  "visibility" : "10km",
