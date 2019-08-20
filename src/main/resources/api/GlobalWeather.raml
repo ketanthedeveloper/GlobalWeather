@@ -22,9 +22,32 @@ securitySchemes:
             combination is invalid, or the user is not allowed to access
             the content provided by the requested URL.
             
-            
+traits: 
+  -404ErrorResponseMessage:
+      description: 404 error message for webservice
+      responses:
+        404:
+         body: 
+           application/json:
+             example: { "message" : "Not found"}
+
+  -400ErrorResponseMessage:          
+      description: 400 error message for webservice
+      responses:
+        404:
+         body: 
+           application/json:
+             example: { "message" : "Bad Request"}  
+  -500ErrorResponseMessage:          
+      description: 500 error message for webservice
+      responses:
+        404:
+         body: 
+           application/json:
+             example: { "message" : "Internal Server Error"} 
+             
 /global-weather:     
-  /cities-by-country:
+  /cities-by-Country:
     get:
       description: Get All cities By Country
       queryParameters:
@@ -35,27 +58,10 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-               { "NewDataSet" : [
-                   {"country":"Australia", 
-                     "city":"sydney" 
-                   },
-                    {"country":"Australia", 
-                       "city":"rosehill" 
-                     }
-                ] }
-        404:
-          body:
-            application/json:
-             example: { "message" : "Not found"}      
-        400 :
-          body:
-            application/json:
-             example: { "message" : "Bad Request"}   
-        500 :
-          body:
-            application/json:
-             example: { "message" : "Internal Server Error"}      
+              example: !include Example_Json/citiesbycountry.json
+        
+      is: [-404ErrorResponseMessage , -400ErrorResponseMessage , -500ErrorResponseMessage]
+            
        
     
   /weather:
@@ -73,35 +79,6 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                [
-                   {
-                   "location":"Melbourne", 
-                     "time":"11.00 AM" ,
-                     "wind" : "15 kmph",
-                 "visibility" : "10km",
-                 "sky condition" : "sunny",
-                 "temprature" : "18 C",
-                 "dewpoint" : "2 C",
-                 "relativehumidity" : "35",
-                 "status" : "normal" 
-                   }
-                ]
-        404:
-          body:
-            application/json:
-             example: { "message" : "Not found"}      
-        400 :
-          body:
-            application/json:
-             example: { "message" : "Bad Request"}   
-        403 :
-          body:
-            application/json:
-             example: { "message" : "Forbidden"}   
-        
-        500 :
-          body:
-            application/json:
-             example: { "message" : "Internal Server Error"}      
+              example: !include Example_Json/cityweather.json
+      is: [-404ErrorResponseMessage , -400ErrorResponseMessage , -500ErrorResponseMessage]
        
