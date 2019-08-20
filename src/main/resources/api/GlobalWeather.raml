@@ -1,7 +1,7 @@
 #%RAML 1.0
 title: Weather REST Services API using Data Types
 version: v1
-baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/cf99f9fe-dc6c-4748-a4f5-1809aee3a158/api/{version}
+
 mediaType: application/json
 
 securitySchemes:
@@ -47,7 +47,7 @@ traits:
              example: { "message" : "Internal Server Error"} 
              
 /global-weather:     
-  /cities-by-Country:
+  /cities-by-country:
     get:
       description: Get All cities By Country
       queryParameters:
